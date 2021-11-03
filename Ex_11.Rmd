@@ -100,6 +100,7 @@ library("tidyverse")
 library("viridis")
 library('ggmap')
 library("OpenStreetMap")
+library("gpclib")
 ```
 
 # Dataset
@@ -177,7 +178,7 @@ In order to create a bounding box for the imagery we will use the ```min``` and 
 ```{r imagery, message=FALSE, warning=FALSE, echo=TRUE, fig.height=6, fig.width=8}
 utm_points <- cbind(data$utm.easting, data$utm.northing)
 utm_locations <- SpatialPoints(utm_points, 
-                 proj4string=CRS("+proj=utm +zone=47 +datum=WGS84"))
+                 proj4string=CRS("+proj=utm +zone=16 +datum=WGS84"))
 proj_lat.lon <- as.data.frame(spTransform(
                 utm_locations, CRS("+proj=longlat +datum=WGS84")))
 colnames(proj_lat.lon) <- c("x","y")
@@ -185,7 +186,7 @@ raster <- openmap(c(max(proj_lat.lon$y)+0.01, min(proj_lat.lon$x)-0.01),
                   c(min(proj_lat.lon$y)-0.01, max(proj_lat.lon$x)+0.01), 
                   type = "bing")
 raster_utm <- openproj(raster, 
-              projection = "+proj=utm +zone=47 +datum=WGS84 +units=m +no_defs")
+              projection = "+proj=utm +zone=16 +datum=WGS84 +units=m +no_defs")
 ```
 
 
@@ -214,8 +215,8 @@ A description of the steps within the following code will be discussed following
 ```{r MCP plot, message=FALSE, warning=FALSE, echo=TRUE, fig.height=6, fig.width=6}
 mcp_raster <- function(filename){
   data <- read.csv(file = filename)
-  x <- as.data.frame(data$location.long)
-  y <- as.data.frame(data$location.lat)
+  x <- as.data.frame(data$utm.easting)
+  y <- as.data.frame(data$utm.northing)
   xy <- c(x,y)
   data.proj <- SpatialPointsDataFrame(xy,data, proj4string = CRS("+proj=utm +zone=16 +datum=WGS84 +units=m +no_defs"))
   xy <- SpatialPoints(data.proj@coords)
@@ -229,13 +230,13 @@ mcp_raster <- function(filename){
     theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) +
     geom_polygon(data=mcp.poly, aes(x=mcp.poly$long, y=mcp.poly$lat), alpha=0.8) +
     geom_point(data=mcp.points, aes(x=x, y=y)) + 
-    labs(x="Longitude", y="Latitude", title=mcp.points$identifier) +
+    labs(x="Easting (m)", y="Northing (m)", title=mcp.points$identifier) +
     theme(legend.position="none", plot.title = element_text(face = "bold", hjust = 0.5)) + 
     annotation_custom(units)
   mcp.plot
 }
 
-#pblapply(files, mcp_raster)
+pblapply(files, mcp_raster)
 ```
 
 The anatomy of the function above is as follows:
@@ -265,7 +266,7 @@ kde_raster <- function(filename){
   data.proj <- SpatialPointsDataFrame(xy,data, proj4string = CRS("+proj=utm +zone=16 +datum=WGS84 +units=m +no_defs"))
   xy <- SpatialPoints(data.proj@coords)
   kde<-kernelUD(xy, h="href", kern="bivnorm", grid=100)
-  ver <- getverticeshr(kde, 95)
+  ver <- getverticeshr(kde, 100)
   kde.points <- cbind((data.frame(data.proj@coords)),data$individual.local.identifier)
   colnames(kde.points) <- c("x","y","identifier")
   kde.poly <- fortify(ver, region = "id")
@@ -281,7 +282,7 @@ kde_raster <- function(filename){
   kde.plot
 }
 
-#pblapply(files, kde_raster)
+pblapply(files, kde_raster)
 ```
 
 The anatomy of the function above is as follows:
