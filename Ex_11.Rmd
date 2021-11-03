@@ -1,8 +1,8 @@
 ---
 title: Home Range Analysis <br><small>Advanced Data Analytics</small></br>
-author: "Austin Peay State University"
+author: "Jenna Atma"
 output:
-  html_notebook:
+  html_document: 
     df_print: paged
     rows.print: 10
     theme: cosmo
@@ -13,7 +13,7 @@ output:
       collapsed: no
       smooth_scroll: yes
   pdf_document: default
-  html_document: 
+  html_notebook:
     df_print: paged
     rows.print: 10
     theme: cosmo
@@ -86,8 +86,20 @@ There are several specialty packages that will be used in this exercise due to t
 To begin, we will install the following:
 
 ```{r Packages, echo=TRUE, message=FALSE, warning=FALSE}
-packages<-c("adehabitatHR","data.table","ggfortify","grid","move","moveVis","OpenStreetMap","pbapply","plotly","rgdal","sp","tidyverse","viridis")
-sapply(packages, library, character.only=T)
+library("adehabitatHR")
+library("data.table")
+library("ggfortify")
+library("grid")
+library("move")
+library("moveVis")
+library("pbapply")
+library("plotly")
+library("rgdal")
+library("sp")
+library("tidyverse")
+library("viridis")
+library('ggmap')
+library("OpenStreetMap")
 ```
 
 # Dataset
@@ -98,21 +110,17 @@ While we have seen that biological data can be obtained from sites such as [Drya
 
 <details><summary><big>Import Dataset with ```read.csv```</big></summary>
 ```{r data, echo=TRUE, message=FALSE, warning=FALSE}
-data <- read.csv("./Data/ophiophagus_hannah.csv")
-```
-</details>
-```{r structure, echo=TRUE, message=FALSE, warning=FALSE}
-head(data)
+data <- read.csv("./Data/lowaSCH.csv")
 ```
 
 Notice that this dataset contains more than species information and x,y coordinates. While that information is important, this dataset also contains time and date information (timestamp), sensor type, and UTM data. In order to be sure that the dataset contains no outliers, we can plot the data using ```ggplot``` and ```plotly``` to interactively view the data.
 
 ```{r plotly, echo=TRUE, fig.height=6, fig.width=8, message=FALSE, warning=FALSE}
 qaqc_plot <- ggplot() + geom_point(data=data, 
-                                   aes(utm.easting,utm.northing,
+                                   aes(location.long,location.lat,
                                        color=individual.local.identifier)) +
-                        labs(x="Easting", y="Northing") +
-                        guides(color=guide_legend("Identifier"))
+                        labs(x="Longitude", y="Latitude") +
+                        guides(color=guide_legend("Individual"))
 
 ggplotly(qaqc_plot)
 ```
@@ -122,10 +130,6 @@ With ```plotly```, similar to ```leaflet```, we have the ability to examine the 
 While we could continue with the current dataset, any analysis would calculate home range for the entire population rather than the individual. 
 
 <p align="center">
-MCP Analysis Example | KDE Analysis Example
-- | - 
-![](./mcp_all.png "MCP for all points") | ![](./kde_all.png "KDE for all points")
-</p>
 
 So here we will create a function and use the ```lapply``` command to apply a function over a list or vector dataset. Specifically, this function will take the original *data*set, split it into separate files based on the individual identifier, and create new \*.csv files using the identifier as the filename. 
 
@@ -155,7 +159,7 @@ for(i in list){
 All of the \*.csv files in your root directory will now be available in your global environment. However, since we used a looping function to create individual \*.csv files, we will need to make a list of those individual files created in the previous section to refer back to during the analysis when necessary.
 
 ```{r list, echo=TRUE, message=FALSE, warning=FALSE, results='hide'}
-files <- list.files(path = ".", pattern = "[OPHA]+[0-9]+", full.names = TRUE)
+files <- list.files(path = ".", pattern = "[m]+[0-9]+", full.names = TRUE)
 ```
 
 In the ```list.files``` command above, ```path = "."``` informs the locations, in this case the root directory, ```pattern =``` describes the way the files are named, in this case OPHA followed by a number between 0-9, and ```full.names``` describes how the files will be listed. 
@@ -184,6 +188,7 @@ raster_utm <- openproj(raster,
               projection = "+proj=utm +zone=47 +datum=WGS84 +units=m +no_defs")
 ```
 
+
 In the script above, ```utm_point``` is an x,y derived from the primary dataset, ```utm_locations``` set the projection to **UTM Zone 47**, ```proj_lat.lon``` converted the UTM points to longitude/latitude, ```raster``` uses the min/max x,y data to create a bounding box to retrieve the aerial imagery, and ```raster_utm``` reprojected the imagery back to **UTM Zone 47** consistent with the location in Thailand. Now we can use ```autoplot.OpenStreetMap``` to display the raster image file with the UTM locations as an overlay.
 
 ```{r imagery plot, message=FALSE, warning=FALSE, echo=TRUE, fig.height=6, fig.width=6}
@@ -209,10 +214,10 @@ A description of the steps within the following code will be discussed following
 ```{r MCP plot, message=FALSE, warning=FALSE, echo=TRUE, fig.height=6, fig.width=6}
 mcp_raster <- function(filename){
   data <- read.csv(file = filename)
-  x <- as.data.frame(data$utm.easting)
-  y <- as.data.frame(data$utm.northing)
+  x <- as.data.frame(data$location.long)
+  y <- as.data.frame(data$location.lat)
   xy <- c(x,y)
-  data.proj <- SpatialPointsDataFrame(xy,data, proj4string = CRS("+proj=utm +zone=12 +datum=WGS84 +units=m +no_defs"))
+  data.proj <- SpatialPointsDataFrame(xy,data, proj4string = CRS("+proj=utm +zone=16 +datum=WGS84 +units=m +no_defs"))
   xy <- SpatialPoints(data.proj@coords)
   mcp.out <- mcp(xy, percent=100, unout="ha")
   mcp.points <- cbind((data.frame(xy)),data$individual.local.identifier)
@@ -224,13 +229,13 @@ mcp_raster <- function(filename){
     theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) +
     geom_polygon(data=mcp.poly, aes(x=mcp.poly$long, y=mcp.poly$lat), alpha=0.8) +
     geom_point(data=mcp.points, aes(x=x, y=y)) + 
-    labs(x="Easting (m)", y="Northing (m)", title=mcp.points$identifier) +
+    labs(x="Longitude", y="Latitude", title=mcp.points$identifier) +
     theme(legend.position="none", plot.title = element_text(face = "bold", hjust = 0.5)) + 
     annotation_custom(units)
   mcp.plot
 }
 
-pblapply(files, mcp_raster)
+#pblapply(files, mcp_raster)
 ```
 
 The anatomy of the function above is as follows:
@@ -257,7 +262,7 @@ kde_raster <- function(filename){
   x <- as.data.frame(data$utm.easting)
   y <- as.data.frame(data$utm.northing)
   xy <- c(x,y)
-  data.proj <- SpatialPointsDataFrame(xy,data, proj4string = CRS("+proj=utm +zone=47 +datum=WGS84 +units=m +no_defs"))
+  data.proj <- SpatialPointsDataFrame(xy,data, proj4string = CRS("+proj=utm +zone=16 +datum=WGS84 +units=m +no_defs"))
   xy <- SpatialPoints(data.proj@coords)
   kde<-kernelUD(xy, h="href", kern="bivnorm", grid=100)
   ver <- getverticeshr(kde, 95)
@@ -276,7 +281,7 @@ kde_raster <- function(filename){
   kde.plot
 }
 
-pblapply(files, kde_raster)
+#pblapply(files, kde_raster)
 ```
 
 The anatomy of the function above is as follows:
@@ -321,7 +326,7 @@ bb.plot <- autoplot.OpenStreetMap(raster_utm, expand = TRUE) + theme_bw() + them
   scale_fill_viridis_c(option = "inferno") + annotation_custom(bb_units) +
   labs(x="Easting (m)", y="Northing (m)", title="OPHA1") +
   theme(legend.position="none", plot.title = element_text(face = "bold", hjust = 0.5))
-bb.plot
+#bb.plot
 ```
 
 The anatomy of the script above is as follows:
@@ -343,7 +348,7 @@ The final analysis we will perform in this exercise is a visual animation of the
 We need to begin by creating a *move* object containing relocations (x,y), time and date information (time), a projection string, individual identifier (animal), and sensor type (sensor). *See the description for ```move()``` in the help menu for optional information.*
 
 ```{r move, message=FALSE, warning=FALSE, echo=TRUE, results='hide'}
-opha.move <- move(x=OPHA1$location.long, 
+#opha.move <- move(x=OPHA1$location.long, 
              y=OPHA1$location.lat, 
              time=as.POSIXct(OPHA1$timestamp, 
                              format="%Y-%m-%d %H:%M:%S", tz="Asia/Bangkok"), 
@@ -355,7 +360,7 @@ opha.move <- move(x=OPHA1$location.long,
 With this information, we can now create the timing, number of frames, and animation for the relocations. First, to understand the time lag between the relocations we can use ```median(timeLag(opha.move, unit = "mins"))``` to calculate the median value. However, in the ```aling_move()``` function ther is an option to set the uniform scale manually or by using a fixed resolution: min, max, or mean. For simplicity, we will use the **max** temporal resolution.
 
 ```{r movement, message=FALSE, warning=FALSE, echo=TRUE, results='hide'}
-movement <- align_move(opha.move, res = "max", digit = 0, unit = "secs")
+#movement <- align_move(opha.move, res = "max", digit = 0, unit = "secs")
 ```
 
 With the data now on a uniform time scale we can create the frames and animation for the relocations. For this step I will use a basemap from [MapBox](https://www.mapbox.com/) which require token access through the use of their API. To do this you need to register with MapBox and create an access token. Then create a .Renviron file in your project folder. Copy the token information from MapBox and create an object in the .Renviron file such as `map_token = 'paste token here'` and add `map_token =  Sys.getenv('map_token')` to the script below. However using the `get_maptypes()` script you can see there are various map services and map types that can be used. A simple output would be to use `map_service = 'osm'` (OpenStreetMaps) and `map_type = 'topographic'` or other map types available by viewing `get_maptypes('owm')`. when using a basemap without token access the `map_token` option can be removed from the script below.
@@ -363,7 +368,7 @@ With the data now on a uniform time scale we can create the frames and animation
 > Warning, the number of frames, frames/second, and output file type will determine how long this process will take and how large the output file will be.
 
 ```{r reloc frames, echo=TRUE, message=FALSE, warning=FALSE, cache=TRUE}
-frames <- frames_spatial(movement, path_colours = "red",
+#frames <- frames_spatial(movement, path_colours = "red",
                          map_service = "mapbox", 
                          map_type = "satellite",
                          map_token =  Sys.getenv('map_token'),
@@ -376,14 +381,6 @@ frames <- frames_spatial(movement, path_colours = "red",
 ```
 
 ```{r animated relocs, echo=TRUE, message=FALSE, warning=FALSE, cache=TRUE}
-animate_frames(frames, fps = 5, overwrite = TRUE,
-               out_file = "./moveVis-2021fps.gif")
+#animate_frames(frames, fps = 5, overwrite = TRUE,
+#               out_file = "./moveVis-2021fps.gif")
 ```               
-
-![](./moveVis-2021fps.gif "Relocation Animation")
-               
-As you can see from the result above, even a ~12sec clip with <60 frames took nearly 5min to key, obtain base imagery, assign frames, and render. So keep that in mind when creating these animations. The output from this is stored in your root directory and can be used as an animation on other programs or in html documents.
-
-# YOUR TURN!
-
-Now it’s your turn! Although some of this might not be applicable to your thesis research, try this information out on a dataset of your choice from any of the sources above. If you can apply this to your thesis, then add it to your website! Otherwise create a new repository for your presentation on Thursday.
