@@ -1,29 +1,31 @@
 event-id,visible,timestamp,location-long,location-lat,sensor-type,individual-taxon-canonical-name,tag-local-identifier,individual-local-identifier,study-name,utm-easting,utm-northing,utm-zone
-1,TRUE,45:00.0,-87.31436,36.437066,point-count,1,Parkesia motacilla,m1,Louisiana Waterthrush,471824.5996,4032473.129,16S
-2,TRUE,07:00.0,-87.312311,36.437053,point-count,1,Parkesia motacilla,m1,Louisiana Waterthrush,472008.2429,4032471.091,16S
-3,TRUE,28:00.0,-87.310508,36.437553,point-count,1,Parkesia motacilla,m1,Louisiana Waterthrush,472170.0209,4032526.031,16S
-4,TRUE,45:00.0,-87.311431,36.437173,point-count,1,Parkesia motacilla,m1,Louisiana Waterthrush,472087.1586,4032484.146,16S
-5,TRUE,07:00.0,-87.31312,36.4371,point-count,1,Parkesia motacilla,m1,Louisiana Waterthrush,471935.7507,4032476.539,16S
-6,TRUE,55:00.0,-87.310288,36.43779,point-count,1,Parkesia motacilla,m1,Louisiana Waterthrush,472189.8235,4032552.256,16S
-7,TRUE,31:00.0,-87.314934,36.437272,point-count,1,Parkesia motacilla,m1,Louisiana Waterthrush,471773.2277,4032496.147,16S
-8,TRUE,25:00.0,-87.315814,36.437134,point-count,1,Parkesia motacilla,m1,Louisiana Waterthrush,471694.3051,4032481.098,16S
-9,TRUE,13:00.0,-87.311919,36.437187,point-count,2,Parkesia motacilla,m2,Louisiana Waterthrush,472043.4252,4032485.841,16S
-10,TRUE,26:00.0,-87.315579,36.438821,point-count,2,Parkesia motacilla,m2,Louisiana Waterthrush,471715.9798,4032668.156,16S
-11,TRUE,22:00.0,-87.315881,36.438982,point-count,2,Parkesia motacilla,m2,Louisiana Waterthrush,471688.9712,4032686.103,16S
-12,TRUE,21:00.0,-87.315298,36.438669,point-count,2,Parkesia motacilla,m2,Louisiana Waterthrush,471741.1097,4032651.214,16S
-13,TRUE,58:00.0,-87.314468,36.437133,point-count,2,Parkesia motacilla,m2,Louisiana Waterthrush,471814.944,4032480.593,16S
-14,TRUE,22:00.0,-87.31519,36.437633,point-count,2,Parkesia motacilla,m2,Louisiana Waterthrush,471750.4138,4032536.265,16S
-15,TRUE,07:00.0,-87.317056,36.439762,point-count,2,Parkesia motacilla,m2,Louisiana Waterthrush,471583.9452,4032772.969,16S
-16,TRUE,53:00.0,-87.317768,36.439979,point-count,2,Parkesia motacilla,m2,Louisiana Waterthrush,471520.2115,4032797.249,16S
-17,TRUE,01:00.0,-87.315264,36.438101,point-count,2,Parkesia motacilla,m2,Louisiana Waterthrush,471743.951,4032588.199,16S
-18,TRUE,20:00.0,-87.313217,36.437109,point-count,2,Parkesia motacilla,m2,Louisiana Waterthrush,471927.06,4032477.566,16S
-19,TRUE,21:00.0,-87.315792,36.437299,point-count,2,Parkesia motacilla,m2,Louisiana Waterthrush,471696.3368,4032499.394,16S
-20,TRUE,59:00.0,-87.317464,36.437079,point-count,3,Parkesia motacilla,m3,Louisiana Waterthrush,471546.3988,4032475.482,16S
-21,TRUE,31:00.0,-87.318427,36.437365,point-count,3,Parkesia motacilla,m3,Louisiana Waterthrush,471460.1917,4032507.491,16S
-22,TRUE,51:00.0,-87.31495,36.437009,point-count,3,Parkesia motacilla,m3,Louisiana Waterthrush,471771.6984,4032466.979,16S
-23,TRUE,33:00.0,-87.315186,36.437311,point-count,3,Parkesia motacilla,m3,Louisiana Waterthrush,471750.6556,4032500.547,16S
-24,TRUE,17:00.0,-87.315827,36.437316,point-count,3,Parkesia motacilla,m3,Louisiana Waterthrush,471693.206,4032501.289,16S
-25,TRUE,37:00.0,-87.316777,36.437139,point-count,3,Parkesia motacilla,m3,Louisiana Waterthrush,471607.9951,4032481.935,16S
-26,TRUE,43:00.0,-87.315988,36.437199,point-count,3,Parkesia motacilla,m3,Louisiana Waterthrush,471678.7334,4032488.359,16S
-27,TRUE,56:00.0,-87.318979,36.437462,point-count,3,Parkesia motacilla,m3,Louisiana Waterthrush,471410.7527,4032518.414,16S
-28,TRUE,58:00.0,-87.314794,36.43704,point-count,3,Parkesia motacilla,m3,Louisiana Waterthrush,471785.6916,4032470.372,16S
+7017147842,TRUE,3/30/21 7:30,-87.31436,36.437066,point-count,1,Parkesia motacilla,m1,Louisiana Waterthrush,471824.5996,4032473.129,16S
+7017147843,TRUE,3/31/21 7:30,-87.312311,36.437053,point-count,1,Parkesia motacilla,m1,Louisiana Waterthrush,472008.2429,4032471.091,16S
+7017147844,TRUE,4/1/21 7:30,-87.310508,36.437553,point-count,1,Parkesia motacilla,m1,Louisiana Waterthrush,472170.0209,4032526.031,16S
+7017147845,TRUE,4/2/21 7:30,-87.311431,36.437173,point-count,1,Parkesia motacilla,m1,Louisiana Waterthrush,472087.1586,4032484.146,16S
+7017147846,TRUE,4/3/21 7:30,-87.31312,36.4371,point-count,1,Parkesia motacilla,m1,Louisiana Waterthrush,471935.7507,4032476.539,16S
+7017147847,TRUE,4/4/21 7:30,-87.310288,36.43779,point-count,1,Parkesia motacilla,m1,Louisiana Waterthrush,472189.8235,4032552.256,16S
+7017147848,TRUE,4/5/21 7:30,-87.314934,36.437272,point-count,1,Parkesia motacilla,m1,Louisiana Waterthrush,471773.2277,4032496.147,16S
+7017147849,TRUE,4/6/21 7:30,-87.315814,36.437134,point-count,1,Parkesia motacilla,m1,Louisiana Waterthrush,471694.3051,4032481.098,16S
+7017147850,TRUE,3/30/21 7:30,-87.311919,36.437187,point-count,2,Parkesia motacilla,m2,Louisiana Waterthrush,472043.4252,4032485.841,16S
+7017147851,TRUE,3/31/21 7:30,-87.315579,36.438821,point-count,2,Parkesia motacilla,m2,Louisiana Waterthrush,471715.9798,4032668.156,16S
+7017147852,TRUE,4/1/21 7:30,-87.315881,36.438982,point-count,2,Parkesia motacilla,m2,Louisiana Waterthrush,471688.9712,4032686.103,16S
+7017147853,TRUE,4/2/21 7:30,-87.315298,36.438669,point-count,2,Parkesia motacilla,m2,Louisiana Waterthrush,471741.1097,4032651.214,16S
+7017147854,TRUE,4/3/21 7:30,-87.314468,36.437133,point-count,2,Parkesia motacilla,m2,Louisiana Waterthrush,471814.944,4032480.593,16S
+7017147855,TRUE,4/4/21 7:30,-87.31519,36.437633,point-count,2,Parkesia motacilla,m2,Louisiana Waterthrush,471750.4138,4032536.265,16S
+7017147856,TRUE,4/5/21 7:30,-87.317056,36.439762,point-count,2,Parkesia motacilla,m2,Louisiana Waterthrush,471583.9452,4032772.969,16S
+7017147857,TRUE,4/6/21 7:30,-87.317768,36.439979,point-count,2,Parkesia motacilla,m2,Louisiana Waterthrush,471520.2115,4032797.249,16S
+7017147858,TRUE,4/7/21 7:30,-87.315264,36.438101,point-count,2,Parkesia motacilla,m2,Louisiana Waterthrush,471743.951,4032588.199,16S
+7017147859,TRUE,4/8/21 7:30,-87.313217,36.437109,point-count,2,Parkesia motacilla,m2,Louisiana Waterthrush,471927.06,4032477.566,16S
+7017147860,TRUE,4/9/21 7:30,-87.315792,36.437299,point-count,2,Parkesia motacilla,m2,Louisiana Waterthrush,471696.3368,4032499.394,16S
+7017147861,TRUE,3/30/21 7:30,-87.317464,36.437079,point-count,3,Parkesia motacilla,m3,Louisiana Waterthrush,471546.3988,4032475.482,16S
+7017147862,TRUE,3/31/21 7:30,-87.318427,36.437365,point-count,3,Parkesia motacilla,m3,Louisiana Waterthrush,471460.1917,4032507.491,16S
+7017147863,TRUE,4/1/21 7:30,-87.31495,36.437009,point-count,3,Parkesia motacilla,m3,Louisiana Waterthrush,471771.6984,4032466.979,16S
+7017147864,TRUE,4/2/21 7:30,-87.315186,36.437311,point-count,3,Parkesia motacilla,m3,Louisiana Waterthrush,471750.6556,4032500.547,16S
+7017147865,TRUE,4/3/21 7:30,-87.315827,36.437316,point-count,3,Parkesia motacilla,m3,Louisiana Waterthrush,471693.206,4032501.289,16S
+7017147866,TRUE,4/4/21 7:30,-87.316777,36.437139,point-count,3,Parkesia motacilla,m3,Louisiana Waterthrush,471607.9951,4032481.935,16S
+7017147867,TRUE,4/5/21 7:30,-87.315988,36.437199,point-count,3,Parkesia motacilla,m3,Louisiana Waterthrush,471678.7334,4032488.359,16S
+7017147868,TRUE,4/6/21 7:30,-87.318979,36.437462,point-count,3,Parkesia motacilla,m3,Louisiana Waterthrush,471410.7527,4032518.414,16S
+7017147869,TRUE,4/7/21 7:30,-87.314794,36.43704,point-count,3,Parkesia motacilla,m3,Louisiana Waterthrush,471785.6916,4032470.372,16S
+,,,,,,,,,,,,
+,,,,,,,,,,,,
