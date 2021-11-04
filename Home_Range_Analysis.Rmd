@@ -1,3 +1,5 @@
+<body style="background-color:#8fc9be">
+
 ---
 title: Home Range Analysis <br><small>Advanced Data Analytics</small></br>
 author: "Jenna Atma"
@@ -73,16 +75,6 @@ th, td {padding: 5px;}
 
 This exercise will build on the skills acquired in the [Mapping Basics](https://chrismgentry.github.io/Mapping-Basics/) and [Species Distribution Modeling](https://chrismgentry.github.io/Distribution-Maps/) exercises to perform **Home Range Analysis** and map the results. We will start by examining the structure of data used in home range analyses, we will look at ways to perform QA/QC checks on the location data, and finally various ways to visualize the data. One of the new skills we will discuss in this exercise is to create functions and loops to replicate analyses. 
 
-## Packages used in this exercise
-
-There are several specialty packages that will be used in this exercise due to the specific nature of the analyses. Some of these packages you will need to install while several others we have used in previous exercises and should already be installed.
-
-<p align="center">
-|```adehabitatHR``` | ```data.table``` | ```ggfortify``` | ```grid```| ```move``` |
-```moveVis``` | ```OpenStreetMap``` |<br></br> |```pbapply``` |
-```plotly``` | ```rgdal``` | ```sp``` | ```tidyverse``` | ```viridis``` |
-</p>
-
 To begin, we will install the following:
 
 ```{r Packages, echo=TRUE, message=FALSE, warning=FALSE}
@@ -106,7 +98,11 @@ library("maptools")
 
 # Dataset
 
-<details><summary><big>Importing dataset with ```read.csv```:</big></summary>
+![](images/lowaSCH.png){width=60%}
+
+<details><summary><big>Louisiana Waterthrush</big></summary>
+
+Importing dataset with ```read.csv```:
 ```{r data, echo=TRUE, message=FALSE, warning=FALSE}
 data <- read.csv("./Data/lowaSCH.csv")
 ```
@@ -148,36 +144,25 @@ In the ```list.files``` command above, ```path = "."``` informs the locations, i
 
 Although my data contained only longitude/latitude values, I converted them to UTM and back again to longitude/latitude coordinates to practice using the code if I ever receive data that only has UTM values. 
 
-```{r imagery, message=FALSE, warning=FALSE, echo=TRUE, fig.height=6, fig.width=8}
+```{r imagery2, message=FALSE, warning=FALSE, echo=TRUE, fig.height=8, fig.width=10}
 utm_points <- cbind(data$utm.easting, data$utm.northing)
 utm_locations <- SpatialPoints(utm_points, 
                  proj4string=CRS("+proj=utm +zone=16 +datum=WGS84"))
 proj_lat.lon <- as.data.frame(spTransform(
                 utm_locations, CRS("+proj=longlat +datum=WGS84")))
 colnames(proj_lat.lon) <- c("x","y")
-raster2 <- openmap(c(36.440453, -87.309515),c(36.436534, -87.319491), type="bing")
-raster <- openmap(c(max(proj_lat.lon$y)+0.01, min(proj_lat.lon$x)-0.01), 
-                  c(min(proj_lat.lon$y)-0.01, max(proj_lat.lon$x)+0.01), 
+raster <- openmap(c(max(proj_lat.lon$y)+0.001, min(proj_lat.lon$x)-0.001), 
+                  c(min(proj_lat.lon$y)-0.001, max(proj_lat.lon$x)+0.001), 
                   type = "bing")
 raster_utm <- openproj(raster, 
-              projection = "+proj=utm +zone=16 +datum=WGS84 +units=m +no_defs")
-raster2_utm <- openproj(raster2, 
               projection = "+proj=utm +zone=16 +datum=WGS84 +units=m +no_defs")
 ```
 
 
 In the script above, ```utm_point``` is an x,y derived from the primary dataset, ```utm_locations``` set the projection to **UTM Zone 16**, ```proj_lat.lon``` converted the UTM points to longitude/latitude, ```raster``` uses the min/max x,y data to create a bounding box to retrieve the aerial imagery, and ```raster_utm``` reprojected the imagery back to **UTM Zone 16** for Tennessee. Next, ```autoplot.OpenStreetMap``` will display the raster image file with the UTM locations as an overlay.
 
-```{r imagery plot, message=FALSE, warning=FALSE, echo=TRUE, fig.height=6, fig.width=6}
+```{r imagery plot, message=FALSE, warning=FALSE, echo=TRUE, fig.height=8, fig.width=10}
 autoplot.OpenStreetMap(raster_utm, expand = TRUE) + theme_bw() +
-  theme(legend.position="bottom") +
-  theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) +
-  geom_point(data=data, aes(utm.easting,utm.northing,
-             color=individual.local.identifier), size = 3, alpha = 0.8) +
-  theme(axis.title = element_text(face="bold")) + labs(x="Easting",
-        y="Northing") + guides(color=guide_legend("Identifier"))
-
-autoplot.OpenStreetMap(raster2_utm, expand = TRUE) + theme_bw() +
   theme(legend.position="bottom") +
   theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) +
   geom_point(data=data, aes(utm.easting,utm.northing,
@@ -196,9 +181,9 @@ A description of the steps within the following code will be discussed following
 
 I had some issues getting "pblapply" to run, so I had to install the package "gpclib" and specify type="source" in order to bypass whatever error I was getting.
 
-I also changed the point and polygon colors to red in order to see them better on the dark background (especially since I couldn't get it to zoom in any closer to the points).
+I also changed the point and polygon colors in order to see them better on the dark background (especially since I couldn't get it to zoom in any closer to the points).
 
-```{r MCP plot, message=FALSE, warning=FALSE, echo=TRUE, fig.height=6, fig.width=6}
+```{r MCP plot, message=FALSE, warning=FALSE, echo=TRUE, fig.height=8, fig.width=10}
 if (!require(gpclib)) install.packages("gpclib", type="source")
 gpclibPermit()
 
@@ -215,10 +200,10 @@ mcp_raster <- function(filename){
   mcp.poly <- fortify(mcp.out, region = "id")
   units <- grid.text(paste(round(mcp.out@data$area,2),"ha"), x=0.85,  y=0.95,
                      gp=gpar(fontface=4, col="white", cex=0.9), draw = FALSE)
-  mcp.plot <- autoplot.OpenStreetMap(raster2_utm, expand = TRUE) + theme_bw() + theme(legend.position="none") +
+  mcp.plot <- autoplot.OpenStreetMap(raster_utm, expand = TRUE) + theme_bw() + theme(legend.position="none") +
     theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) +
-    geom_polygon(data=mcp.poly, aes(x=mcp.poly$long, y=mcp.poly$lat), color="red",fill="#993333", alpha=0.8) +
-    geom_point(data=mcp.points, aes(x=x, y=y), color = "red") + 
+    geom_polygon(data=mcp.poly, aes(x=mcp.poly$long, y=mcp.poly$lat), color="#ff5e00",fill="#c34800", alpha=0.7) +
+    geom_point(data=mcp.points, aes(x=x, y=y), color = "#ff9b00", size=3) + 
     labs(x="Easting (m)", y="Northing (m)", title=mcp.points$identifier) +
     theme(legend.position="none", plot.title = element_text(face = "bold", hjust = 0.5)) + 
     annotation_custom(units)
@@ -241,7 +226,7 @@ kde_raster <- function(filename){
   data.proj <- SpatialPointsDataFrame(xy,data, proj4string = CRS("+proj=utm +zone=16 +datum=WGS84 +units=m +no_defs"))
   xy <- SpatialPoints(data.proj@coords)
   kde<-kernelUD(xy, h="href", kern="bivnorm", grid=100)
-  ver <- getverticeshr(kde, 95)
+  ver <- getverticeshr(kde, 30)
   kde.points <- cbind((data.frame(data.proj@coords)),data$individual.local.identifier)
   colnames(kde.points) <- c("x","y","identifier")
   kde.poly <- fortify(ver, region = "id")
@@ -249,8 +234,8 @@ kde_raster <- function(filename){
                      gp=gpar(fontface=4, col="white", cex=0.9), draw = FALSE)
   kde.plot <- autoplot.OpenStreetMap(raster_utm, expand = TRUE) + theme_bw() + theme(legend.position="none") +
     theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) +
-    geom_polygon(data=kde.poly, aes(x=kde.poly$long, y=kde.poly$lat), alpha = 0.8) +
-    geom_point(data=kde.points, aes(x=x, y=y)) +
+    geom_polygon(data=kde.poly, aes(x=kde.poly$long, y=kde.poly$lat), color="#0d9be8", fill="#0d9be8", alpha = 0.8) +
+    geom_point(data=kde.points, aes(x=x, y=y), color="#6ee1f0", size=4) +
     labs(x="Easting (m)", y="Northing (m)", title=kde.points$identifier) +
     theme(legend.position="none", plot.title = element_text(face = "bold", hjust = 0.5)) + 
     annotation_custom(units)
@@ -260,91 +245,47 @@ kde_raster <- function(filename){
 pblapply(files, kde_raster)
 ```
 
-```{r KDE plot, message=FALSE, warning=FALSE, echo=TRUE, fig.height=6, fig.width=6}
-kde_raster <- function(filename){
-  data <- read.csv(file = filename)
-#  x <- as.data.frame(data$utm.easting)
-#  y <- as.data.frame(data$utm.northing)
-#  x <- seq(737326.0, 737639.6, by=5)        
-#  y <-seq(106071.4, 106259.9, by=5)
-#xy <- expand.grid(x=x,y=y)
-x <- seq(-50, 150, by=1.) # resolution is the pixel size you desire 
-y <- seq(-50, 150, by=1.)
-  xy <- c(x,y)
-#xy <- expand.grid(x=x,y=y)
-coordinates(xy) <- ~x+y
-gridded(xy) <- TRUE
-class(xy)
-#x <- seq(xmin,xmax,by=resolution) # where resolution is the pixel size you desire 
-#y <- seq(ymin,ymax,by=resolution)
-kde=kernelUD(data[,1],h=h, grid=xy, kern=c("bivnorm"))
-  data.proj <- SpatialPointsDataFrame(xy,data, proj4string = CRS("+proj=utm +zone=16 +datum=WGS84 +units=m +no_defs"))
-#  xy <- SpatialPoints(data.proj@coords)
-#  kde<-kernelUD(xy, h="href", kern="bivnorm", grid=95)
-  ver <- getverticeshr(kde, 95)
-  kde.points <- cbind((data.frame(data.proj@coords)),data$individual.local.identifier)
-  colnames(kde.points) <- c("x","y","identifier")
-  kde.poly <- fortify(ver, region = "id")
-  units <- grid.text(paste(round(ver$area,2),"ha"), x=0.85,  y=0.95,
-                     gp=gpar(fontface=4, col="white", cex=0.9), draw = FALSE)
-  kde.plot <- autoplot.OpenStreetMap(raster2_utm, expand = TRUE) + theme_bw() + theme(legend.position="none") +
-    theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) +
-    geom_polygon(data=kde.poly, aes(x=kde.poly$long, y=kde.poly$lat), alpha = 0.8) +
-    geom_point(data=kde.points, aes(x=x, y=y)) +
-    labs(x="Easting (m)", y="Northing (m)", title=kde.points$identifier) +
-    theme(legend.position="none", plot.title = element_text(face = "bold", hjust = 0.5)) + 
-    annotation_custom(units)
-  kde.plot
-}
+I kept getting errors with this map, saying that "The grid is too small to allow the estimation of home-range. You should rerun kernelUD with a larger extent parameter".
 
-pblapply(files, kde_raster)
-```
-
-The anatomy of the function above is as follows:
-```kde_raster <- function(filename){...``` for each *file* listed from the project directory complete the following commands
-
-- ```kernelUD()```, estimation of kernel home-range
-- ```getverticeshr()```, extract home-range contour
-
-The rest of the information can be found by examing the help menu for the various commands or looking at the display options for each portion of the script.
+After trying all kinds of code fixes, what finally got this to run was changing the "getverticeshr(kde, 95)" from 95 to 30. I'm not sure why this is the magic number that worked, but it did give me some home range estimates as you can see in the maps above. 
 
 ### Brownian Bridge Movement
 
 Although this appears to be working backwards, in the previous two examples you have seen how to create a function that can be looped to run the analysis for a list fo files. For this analysis, we will create a conventional script for a single individual. Portions of the script that were not previously described will be discussed following the analysis.
 
 ```{r bb plot, message=FALSE, warning=FALSE, echo=TRUE, fig.height=6, fig.width=6}
-LOWAsch <- read.csv("./Data/lowaSCH.csv")
+#LOWAsch <- read.csv("./Data/lowaSCH.csv")
 ```
 ```{r}
-date <- as.POSIXct(strptime(as.character(LOWAsch$timestamp),"%Y-%m-%d %H:%M:%S", tz="US"))
-LOWAsch$date <- date
-LOWAsch.reloc <- cbind.data.frame(LOWAsch$utm.easting, LOWAsch$utm.northing,
-                                as.vector(LOWAsch$individual.local.identifier),
-                                as.POSIXct(date))
-colnames(LOWAsch.reloc) <- c("x","y","id","date")
-trajectory <- as.ltraj(LOWAsch.reloc, date=date, id="LOWAsch")
-sig1 <- liker(trajectory, sig2 = 58, rangesig1 = c(0, 5), plotit = FALSE)
-lowa.traj <- kernelbb(trajectory, sig1 = .7908, sig2 = 58, grid = 100)
-bb_ver <- getverticeshr(lowa.traj, 95)
-bb_poly <- fortify(bb_ver, region = "id", 
-                   proj4string = CRS("+proj=utm +zone=16+
-                                     datum=WGS84 +units=m +no_defs"))
-colnames(bb_poly) <- c("x","y","order","hole","piece","id","group")
-bb_image <- crop(lowa.traj, bb_ver, 
-                 proj4string = CRS("+proj=utm +zone=16 +
-                                   datum=WGS84 +units=m +no_defs"))
-bb_units <- grid.text(paste(round(bb_ver$area,2)," ha"), x=0.85,  y=0.95,
-                   gp=gpar(fontface=4, col="white", cex=0.9), draw = FALSE)
-bb.plot <- autoplot.OpenStreetMap(raster_utm, expand = TRUE) + theme_bw() + theme(legend.position="none") +
-  theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) +
-  geom_tile(data=bb_image, 
-            aes(x=bb_image@coords[,1], y=bb_image@coords[,2],
-            fill = bb_image@data$ud)) +
-  geom_polygon(data=bb_poly, aes(x=x, y=y, group = group), color = "black", fill = NA) +
-  scale_fill_viridis_c(option = "inferno") + annotation_custom(bb_units) +
-  labs(x="Easting (m)", y="Northing (m)", title="LOWAsch") +
-  theme(legend.position="none", plot.title = element_text(face = "bold", hjust = 0.5))
-bb.plot
+#date <- as.POSIXct(strptime(as.character(LOWAsch$timestamp),"%Y-%m-%d %H:%M:%S", tz="US"))
+#LOWAsch$date <- date
+#LOWAsch.reloc <- cbind.data.frame(LOWAsch$utm.easting, LOWAsch$utm.northing,
+#                                as.vector(LOWAsch$individual.local.identifier),
+#                                as.POSIXct(date))
+#colnames(LOWAsch.reloc) <- c("x","y","id","date")
+#trajectory <- as.ltraj(LOWAsch.reloc, date=date, id="LOWAsch")
+#sig1 <- liker(trajectory, sig2 = 58, rangesig1 = c(0, 5), plotit = FALSE)
+#lowa.traj <- kernelbb(trajectory, sig1 = .7908, sig2 = 58, grid = 100)
+#bb_ver <- getverticeshr(lowa.traj, 95)
+#bb_poly <- fortify(bb_ver, region = "id", 
+#                   proj4string = CRS("+proj=utm +zone=16+
+#                                     datum=WGS84 +units=m +no_defs"))
+#colnames(bb_poly) <- c("x","y","order","hole","piece","id","group")
+#bb_image <- crop(lowa.traj, bb_ver, 
+#                 proj4string = CRS("+proj=utm +zone=16 +
+#                                   datum=WGS84 +units=m +no_defs"))
+#bb_units <- grid.text(paste(round(bb_ver$area,2)," ha"), x=0.85,  y=0.95,
+#                   gp=gpar(fontface=4, col="white", cex=0.9), draw = FALSE)
+#bb.plot <- autoplot.OpenStreetMap(raster_utm, expand = TRUE) + theme_bw() + theme(legend.position="none") +
+#  theme(panel.border = element_rect(colour = "black", fill=NA, size=1)) +
+#  geom_tile(data=bb_image, 
+#            aes(x=bb_image@coords[,1], y=bb_image@coords[,2],
+#            fill = bb_image@data$ud)) +
+#  geom_polygon(data=bb_poly, aes(x=x, y=y, group = group), color = "black", fill = NA) +
+#  scale_fill_viridis_c(option = "inferno") + annotation_custom(bb_units) +
+#  labs(x="Easting (m)", y="Northing (m)", title="LOWAsch") +
+#  theme(legend.position="none", plot.title = element_text(face = "bold", hjust = 0.5))
+#bb.plot
 ```
 Issue w/ dates
 
@@ -355,38 +296,39 @@ The final analysis we will perform in this exercise is a visual animation of the
 We need to begin by creating a *move* object containing relocations (x,y), time and date information (time), a projection string, individual identifier (animal), and sensor type (sensor). *See the description for ```move()``` in the help menu for optional information.*
 
 ```{r move, message=FALSE, warning=FALSE, echo=TRUE, results='hide'}
-lowa_move <- move(x=LOWAsch$location.long, 
+#lowa_move <- move(x=LOWAsch$location.long, 
 #lowa2_move<-move(df$location.long, df$location.lat,
-             y=LOWAsch$location.lat, 
-             time=as.POSIXct(LOWAsch$timestamp, 
-                             format="%m/%d/%Y %H:%M",tz="UTC"), 
+#             y=LOWAsch$location.lat, 
+ #            time=as.POSIXct(LOWAsch$timestamp, 
+  #                           format="%m/%d/%Y %H:%M",tz="UTC"), 
              #time=as.POSIXct(df$timestamp,format="%m/%d/%Y %H:%M",tz="UTC"),
-               proj=CRS("+init=epsg:32615"))
-             proj=CRS("+proj=longlat +ellps=WGS84 +datum=WGS84")
-             data=LOWAsch
-             animal=LOWAsch$individual.local.identifier 
-             sensor=LOWAsch$sensor.type
+   #            proj=CRS("+init=epsg:32615"))
+    #         proj=CRS("+proj=longlat +ellps=WGS84 +datum=WGS84")
+     #        data=LOWAsch
+      #       animal=LOWAsch$individual.local.identifier 
+       #      sensor=LOWAsch$sensor.type
 ```
 
 ```{r movement, message=FALSE, warning=FALSE, echo=TRUE, results='hide'}
-movement <- align_move(lowa_move, res = "max", digit = 0, unit = "secs")
+
+#movement <- align_move(lowa_move, res = "max", digit = 0, unit = "secs")
 ```
 
 With the data now on a uniform time scale we can create the frames and animation for the relocations. For this step I will use a basemap from [MapBox](https://www.mapbox.com/) which require token access through the use of their API. To do this you need to register with MapBox and create an access token. Then create a .Renviron file in your project folder. Copy the token information from MapBox and create an object in the .Renviron file such as `map_token = 'paste token here'` and add `map_token =  Sys.getenv('map_token')` to the script below. However using the `get_maptypes()` script you can see there are various map services and map types that can be used. A simple output would be to use `map_service = 'osm'` (OpenStreetMaps) and `map_type = 'topographic'` or other map types available by viewing `get_maptypes('owm')`. when using a basemap without token access the `map_token` option can be removed from the script below.
 
 ```{r reloc frames, echo=TRUE, message=FALSE, warning=FALSE, cache=TRUE}
-frames <- frames_spatial(movement, path_colors = "red",
-                         map_service = "osm", 
-                         map_type = "topographic",
-                         alpha = 0.5) %>% 
-  add_labels(x = "Longitude", y = "Latitude") %>%
-  add_northarrow() %>% 
-  add_timestamps(movement, type = "label") %>%
-  add_scalebar(distance = 2) %>% 
-  add_progress()
+#frames <- frames_spatial(movement, path_colors = "red",
+ #                        map_service = "osm", 
+  #                       map_type = "topographic",
+   #                      alpha = 0.5) %>% 
+#  add_labels(x = "Longitude", y = "Latitude") %>%
+ # add_northarrow() %>% 
+  #add_timestamps(movement, type = "label") %>%
+#  add_scalebar(distance = 2) %>% 
+ # add_progress()
 ```
 
 ```{r animated relocs, echo=TRUE, message=FALSE, warning=FALSE, cache=TRUE}
-animate_frames(frames, fps = 5, overwrite = TRUE,
-               out_file = "./moveVis-2021lowa.gif")
+#animate_frames(frames, fps = 5, overwrite = TRUE,
+ #              out_file = "./moveVis-2021lowa.gif")
 ```               
