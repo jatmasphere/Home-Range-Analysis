@@ -1,5 +1,3 @@
-<body style="background-color:#8fc9be">
-
 ---
 title: Home Range Analysis <br><small>Advanced Data Analytics</small></br>
 author: "Jenna Atma"
@@ -30,6 +28,7 @@ editor_options:
   mode: gfm
 ---
 
+<body style="background-color:#8fc9be">
 ```{=html}
 <style type="text/css">
 
@@ -71,12 +70,6 @@ th, td {padding: 5px;}
 </style>
 ```
 
-# Introduction
-
-This exercise will build on the skills acquired in the [Mapping Basics](https://chrismgentry.github.io/Mapping-Basics/) and [Species Distribution Modeling](https://chrismgentry.github.io/Distribution-Maps/) exercises to perform **Home Range Analysis** and map the results. We will start by examining the structure of data used in home range analyses, we will look at ways to perform QA/QC checks on the location data, and finally various ways to visualize the data. One of the new skills we will discuss in this exercise is to create functions and loops to replicate analyses. 
-
-To begin, we will install the following:
-
 ```{r Packages, echo=TRUE, message=FALSE, warning=FALSE}
 library("adehabitatHR")
 library("data.table")
@@ -98,6 +91,8 @@ library("maptools")
 
 # Dataset
 
+This data comes from my thesis research from this past spring/summer. This dataset contains only my study site on the street behind Dr. Schillers' property, which contains GPS points for 3 individual male Louisiana Waterthrushes.
+
 ![](images/lowaSCH.png){width=60%}
 
 <details><summary><big>Louisiana Waterthrush</big></summary>
@@ -106,8 +101,6 @@ Importing dataset with ```read.csv```:
 ```{r data, echo=TRUE, message=FALSE, warning=FALSE}
 data <- read.csv("./Data/lowaSCH.csv")
 ```
-
-This data comes from my thesis research from this past spring/summer. This dataset contains only my study site on the street behind Dr. Schillers' property, which contains GPS points for 3 individual male Louisiana Waterthrushes.
 
 ```{r plotly, echo=TRUE, fig.height=6, fig.width=8, message=FALSE, warning=FALSE}
 qaqc_plot <- ggplot() + geom_point(data=data, 
@@ -171,11 +164,11 @@ autoplot.OpenStreetMap(raster_utm, expand = TRUE) + theme_bw() +
         y="Northing") + guides(color=guide_legend("Identifier"))
 ```
 
-## Home Range Analysis
+# Home Range Analysis
 
 In the section above we use the ```lapply``` command to loop a function used to separate the original dataset into individual files. This is a useful tool, however, when the function loops through dozens or even hundreds of files, the process can take a long period of time to complete. Using the ```pblapply``` command adds a progress bar (i.e. **pb**) to the process which provides an estimated time for completion of the function. We will use a similar process to the one above, using the ```pblapply``` command to run MCP analysis on the individual \*.csv files. 
 
-### Minimum Convex Polygon
+## Minimum Convex Polygon
 
 A description of the steps within the following code will be discussed following the output. The process works by establishing the function and then running ```pblapply``` referring back to the **files** we created in the dataset portion of this exercise.
 
@@ -213,9 +206,11 @@ mcp_raster <- function(filename){
 pblapply(files, mcp_raster)
 ```
 
-### Kernel-Density Estimation
+## Kernel-Density Estimation
 
-The same design above can be used to create KDE plots for each individual in the dataset. Because the process is essentially the same, only portions of the function that were not previously described will be discussed.
+I kept getting errors with this map, saying that "The grid is too small to allow the estimation of home-range. You should rerun kernelUD with a larger extent parameter".
+
+After trying all kinds of code fixes, what finally got this to run was changing the "getverticeshr(kde, 95)" from 95 to 30. I'm not sure why this is the magic number that worked, but it did give me some home range estimates as you can see in the maps above.
 
 ```{r kernel density, fig.height=8, fig.width=10, message=FALSE, warning=FALSE}
 kde_raster <- function(filename){
@@ -245,11 +240,7 @@ kde_raster <- function(filename){
 pblapply(files, kde_raster)
 ```
 
-I kept getting errors with this map, saying that "The grid is too small to allow the estimation of home-range. You should rerun kernelUD with a larger extent parameter".
-
-After trying all kinds of code fixes, what finally got this to run was changing the "getverticeshr(kde, 95)" from 95 to 30. I'm not sure why this is the magic number that worked, but it did give me some home range estimates as you can see in the maps above. 
-
-### Brownian Bridge Movement
+## Brownian Bridge Movement
 
 Although this appears to be working backwards, in the previous two examples you have seen how to create a function that can be looped to run the analysis for a list fo files. For this analysis, we will create a conventional script for a single individual. Portions of the script that were not previously described will be discussed following the analysis.
 
